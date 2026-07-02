@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration Form</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+     <div class="container">
+        <h1>Student Registration Form</h1>
+
+        <form>
+
+            <label>Student Name</label>
+            <input type="text" placeholder="Enter your name" required>
+
+            <label>Email</label>
+            <input type="email" placeholder="Enter your email" required>
+
+            <label>Phone Number</label>
+            <input type="tel" placeholder="Enter your phone number" required>
+            
+            <label>Date of Birth</label>
+            <input type="date" required>
+
+            <label>Gender</label>
+            <div class="gender">
+                <input type="radio" name="gender"> Male
+                <input type="radio" name="gender"> Female
+                <input type="radio" name="gender"> Other
+            </div>
+
+            <label>Course</label>
+            <select>
+                <option>Select Course</option>
+                <option>Java</option>
+                <option>Python</option>
+                <option>C++</option>
+                <option>Web Development</option>
+            </select>
+
+            <label>Address</label>
+            <textarea rows="4" placeholder="Enter your address"></textarea>
+
+            <label>
+                <input type="checkbox">
+                I agree to the terms and conditions
+            </label>
+
+            <button type="submit">Register</button>
+
+        </form>
+    </div>
+
+</body>
+</html>

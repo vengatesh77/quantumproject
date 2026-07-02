@@ -1,0 +1,28 @@
+body{
+    padding:25px;
+    magin:25px;
+    border:5px solid black;
+    background-color:beige;
+    width:750px;
+    hieght:px;
+}
+h1{
+    color:blue;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+th {
+    background-color: royalblue;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+}
+ul, ol {
+    line-height: 1.8;
+}

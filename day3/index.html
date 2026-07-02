@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number Guess Game</title>
+  <meta name="description" content="A fun and simple number guessing game. Can you find the secret number?" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="emoji">🎯</div>
+      <h1>Number Guess</h1>
+      <p class="tagline">I'm thinking of a number between <strong>1</strong> and <strong>100</strong></p>
+    </div>
+
+    <!-- Attempts Badge -->
+    <div class="attempts-badge">
+      <span id="attempts-left">10</span> chances left
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <input
+        type="number"
+        id="guess-input"
+        placeholder="Enter your guess..."
+        min="1"
+        max="100"
+        autocomplete="off"
+      />
+      <button id="btn-guess" onclick="submitGuess()">Guess! 🚀</button>
+    </div>
+
+    <!-- Feedback Message -->
+    <div id="feedback" class="feedback hidden"></div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-bar-bg">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <p class="progress-label">Attempts used: <span id="attempts-used">0</span> / 10</p>
+    </div>
+
+    <!-- Guess History -->
+    <div class="history-section" id="history-section" style="display:none">
+      <p class="history-title">📋 Your Guesses</p>
+      <div id="history-list" class="history-list"></div>
+    </div>
+
+    <!-- New Game Button -->
+    <button id="btn-new-game" class="btn-new hidden" onclick="newGame()">🔄 Play Again</button>
+
+  </div>
+
+  <!-- Win / Lose Overlay -->
+  <div id="result-overlay" class="overlay hidden">
+    <div class="overlay-box">
+      <div id="overlay-emoji" class="overlay-emoji">🎉</div>
+      <h2 id="overlay-title">You Won!</h2>
+      <p id="overlay-msg">You found the number in 4 guesses!</p>
+      <button onclick="newGame()" class="btn-overlay">Play Again 🔄</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

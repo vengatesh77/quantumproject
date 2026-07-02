@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechLearn Pro LMS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:
+linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.85)),
+url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920');
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+color:#fff;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 50px;
+background:rgba(0,0,0,.3);
+backdrop-filter:blur(15px);
+border-bottom:1px solid rgba(255,255,255,.1);
+position:sticky;
+top:0;
+z-index:100;
+}
+
+.logo{
+font-size:32px;
+font-weight:800;
+color:#00f5ff;
+text-shadow:0 0 10px #00f5ff;
+}
+
+.hero{
+text-align:center;
+padding:80px 20px;
+}
+
+.hero h1{
+font-size:65px;
+font-weight:800;
+margin-bottom:15px;
+text-shadow:0 0 20px rgba(255,255,255,.4);
+}
+
+.hero p{
+font-size:20px;
+color:#ccc;
+margin-bottom:30px;
+}
+
+.search{
+width:min(600px,90%);
+padding:16px 20px;
+border-radius:15px;
+border:1px solid rgba(255,255,255,.2);
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(10px);
+color:white;
+font-size:16px;
+outline:none;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+padding:30px 60px;
+}
+
+.stat{
+background:rgba(17,24,39,.75);
+border:1px solid rgba(0,245,255,.2);
+backdrop-filter:blur(15px);
+padding:25px;
+border-radius:20px;
+text-align:center;
+box-shadow:0 0 20px rgba(0,245,255,.1);
+}
+
+.stat h2{
+font-size:38px;
+color:#00f5ff;
+}
+
+.section-title{
+text-align:center;
+font-size:32px;
+margin-top:30px;
+margin-bottom:30px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:25px;
+padding:20px 60px 60px;
+}
+
+.card{
+background:rgba(17,24,39,.75);
+border:1px solid rgba(255,255,255,.1);
+border-radius:20px;
+padding:25px;
+cursor:pointer;
+transition:.4s;
+backdrop-filter:blur(15px);
+}
+
+.card:hover{
+transform:translateY(-10px);
+box-shadow:0 0 25px rgba(0,245,255,.4);
+border-color:#00f5ff;
+}
+
+.card h2{
+margin-bottom:10px;
+color:#00f5ff;
+}
+
+.progress{
+height:10px;
+background:#222;
+border-radius:20px;
+margin-top:20px;
+overflow:hidden;
+}
+
+.bar{
+height:100%;
+background:#00f5ff;
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.85);
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.modal-content{
+background:rgba(17,24,39,.95);
+border:1px solid rgba(0,245,255,.3);
+padding:30px;
+width:90%;
+max-width:700px;
+border-radius:25px;
+backdrop-filter:blur(20px);
+}
+
+.close{
+float:right;
+font-size:30px;
+cursor:pointer;
+color:#fff;
+}
+
+.modal h2{
+color:#00f5ff;
+margin-bottom:10px;
+}
+
+.modal ul{
+padding-left:20px;
+margin-top:15px;
+}
+
+.modal li{
+margin:8px 0;
+}
+
+footer{
+text-align:center;
+padding:30px;
+color:#bbb;
+}
+
+#cursor{
+position:fixed;
+width:20px;
+height:20px;
+background:#00f5ff;
+border-radius:50%;
+pointer-events:none;
+transform:translate(-50%,-50%);
+box-shadow:0 0 20px #00f5ff;
+z-index:9999;
+}
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:40px;
+}
+
+.stats,
+.grid{
+padding:20px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<div id="cursor"></div>
+
+<header>
+<div class="logo">TechLearn Pro LMS</div>
+</header>
+
+<section class="hero">
+<h1>Learn Web Development Like a Pro</h1>
+<p>Professional LMS Demo with Courses, Search, Dashboard and Popups</p>
+<input type="text" id="search" class="search" placeholder="Search Courses..." onkeyup="filterCourses()">
+</section>
+
+<section class="stats">
+<div class="stat"><h2>50K+</h2><p>Students</p></div>
+<div class="stat"><h2>120+</h2><p>Projects</p></div>
+<div class="stat"><h2>98%</h2><p>Success Rate</p></div>
+<div class="stat"><h2>24/7</h2><p>Support</p></div>
+</section>
+
+<h2 class="section-title">Our Popular Courses</h2>
+
+<div class="grid" id="courses">
+
+<div class="card" data-name="html" onclick="openCourse('html')">
+<h2>HTML Mastery</h2>
+<p>Learn HTML from basics to portfolio projects.</p>
+<div class="progress"><div class="bar" style="width:85%"></div></div>
+</div>
+
+<div class="card" data-name="css" onclick="openCourse('css')">
+<h2>CSS Design Pro</h2>
+<p>Responsive layouts, Flexbox, Grid and Animations.</p>
+<div class="progress"><div class="bar" style="width:70%"></div></div>
+</div>
+
+<div class="card" data-name="javascript" onclick="openCourse('js')">
+<h2>JavaScript Deep Dive</h2>
+<p>DOM, Events, APIs and Real Projects.</p>
+<div class="progress"><div class="bar" style="width:65%"></div></div>
+</div>
+
+<div class="card" data-name="fullstack" onclick="openCourse('fullstack')">
+<h2>Full Stack Bootcamp</h2>
+<p>Frontend + Backend + Deployment.</p>
+<div class="progress"><div class="bar" style="width:60%"></div></div>
+</div>
+
+</div>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+<span class="close" onclick="closeModal()">×</span>
+<h2 id="title"></h2>
+<p id="desc"></p>
+<h3>Topics Covered</h3>
+<ul id="topics"></ul>
+</div>
+</div>
+
+<footer>
+©️ 2026 TechLearn Pro LMS
+</footer>
+
+<script>
+
+const courses={
+html:{
+title:"HTML Mastery",
+desc:"Complete HTML Course",
+topics:["Structure","Headings","Links","Images","Tables","Forms","Semantic HTML"]
+},
+css:{
+title:"CSS Design Pro",
+desc:"Modern UI Design",
+topics:["Colors","Flexbox","Grid","Animations","Responsive Design"]
+},
+js:{
+title:"JavaScript Deep Dive",
+desc:"JavaScript Programming",
+topics:["Variables","Functions","Arrays","DOM","Events","Fetch API"]
+},
+fullstack:{
+title:"Full Stack Bootcamp",
+desc:"Become a Full Stack Developer",
+topics:["HTML","CSS","JavaScript","Node.js","Database","Deployment"]
+}
+};
+
+function openCourse(id){
+
+let c=courses[id];
+
+document.getElementById("title").innerText=c.title;
+document.getElementById("desc").innerText=c.desc;
+
+document.getElementById("topics").innerHTML=
+c.topics.map(topic=><li>${topic}</li>).join("");
+
+document.getElementById("modal").style.display="flex";
+}
+
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+
+function filterCourses(){
+
+let value=document.getElementById("search").value.toLowerCase();
+
+document.querySelectorAll(".card").forEach(card=>{
+
+card.style.display=
+card.dataset.name.includes(value)
+? "block"
+: "none";
+
+});
+}
+
+const cursor=document.getElementById("cursor");
+
+document.addEventListener("mousemove",(e)=>{
+
+cursor.style.left=e.clientX+"px";
+cursor.style.top=e.clientY+"px";
+
+});
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechLearn Pro LMS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:
+linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.85)),
+url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920');
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+color:#fff;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 50px;
+background:rgba(0,0,0,.3);
+backdrop-filter:blur(15px);
+border-bottom:1px solid rgba(255,255,255,.1);
+position:sticky;
+top:0;
+z-index:100;
+}
+
+.logo{
+font-size:32px;
+font-weight:800;
+color:#00f5ff;
+text-shadow:0 0 10px #00f5ff;
+}
+
+.hero{
+text-align:center;
+padding:80px 20px;
+}
+
+.hero h1{
+font-size:65px;
+font-weight:800;
+margin-bottom:15px;
+text-shadow:0 0 20px rgba(255,255,255,.4);
+}
+
+.hero p{
+font-size:20px;
+color:#ccc;
+margin-bottom:30px;
+}
+
+.search{
+width:min(600px,90%);
+padding:16px 20px;
+border-radius:15px;
+border:1px solid rgba(255,255,255,.2);
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(10px);
+color:white;
+font-size:16px;
+outline:none;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+padding:30px 60px;
+}
+
+.stat{
+background:rgba(17,24,39,.75);
+border:1px solid rgba(0,245,255,.2);
+backdrop-filter:blur(15px);
+padding:25px;
+border-radius:20px;
+text-align:center;
+box-shadow:0 0 20px rgba(0,245,255,.1);
+}
+
+.stat h2{
+font-size:38px;
+color:#00f5ff;
+}
+
+.section-title{
+text-align:center;
+font-size:32px;
+margin-top:30px;
+margin-bottom:30px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:25px;
+padding:20px 60px 60px;
+}
+
+.card{
+background:rgba(17,24,39,.75);
+border:1px solid rgba(255,255,255,.1);
+border-radius:20px;
+padding:25px;
+cursor:pointer;
+transition:.4s;
+backdrop-filter:blur(15px);
+}
+
+.card:hover{
+transform:translateY(-10px);
+box-shadow:0 0 25px rgba(0,245,255,.4);
+border-color:#00f5ff;
+}
+
+.card h2{
+margin-bottom:10px;
+color:#00f5ff;
+}
+
+.progress{
+height:10px;
+background:#222;
+border-radius:20px;
+margin-top:20px;
+overflow:hidden;
+}
+
+.bar{
+height:100%;
+background:#00f5ff;
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.85);
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.modal-content{
+background:rgba(17,24,39,.95);
+border:1px solid rgba(0,245,255,.3);
+padding:30px;
+width:90%;
+max-width:700px;
+border-radius:25px;
+backdrop-filter:blur(20px);
+}
+
+.close{
+float:right;
+font-size:30px;
+cursor:pointer;
+color:#fff;
+}
+
+.modal h2{
+color:#00f5ff;
+margin-bottom:10px;
+}
+
+.modal ul{
+padding-left:20px;
+margin-top:15px;
+}
+
+.modal li{
+margin:8px 0;
+}
+
+footer{
+text-align:center;
+padding:30px;
+color:#bbb;
+}
+
+#cursor{
+position:fixed;
+width:20px;
+height:20px;
+background:#00f5ff;
+border-radius:50%;
+pointer-events:none;
+transform:translate(-50%,-50%);
+box-shadow:0 0 20px #00f5ff;
+z-index:9999;
+}
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:40px;
+}
+
+.stats,
+.grid{
+padding:20px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<div id="cursor"></div>
+
+<header>
+<div class="logo">TechLearn Pro LMS</div>
+</header>
+
+<section class="hero">
+<h1>Learn Web Development Like a Pro</h1>
+<p>Professional LMS Demo with Courses, Search, Dashboard and Popups</p>
+<input type="text" id="search" class="search" placeholder="Search Courses..." onkeyup="filterCourses()">
+</section>
+
+<section class="stats">
+<div class="stat"><h2>50K+</h2><p>Students</p></div>
+<div class="stat"><h2>120+</h2><p>Projects</p></div>
+<div class="stat"><h2>98%</h2><p>Success Rate</p></div>
+<div class="stat"><h2>24/7</h2><p>Support</p></div>
+</section>
+
+<h2 class="section-title">Our Popular Courses</h2>
+
+<div class="grid" id="courses">
+
+<div class="card" data-name="html" onclick="openCourse('html')">
+<h2>HTML Mastery</h2>
+<p>Learn HTML from basics to portfolio projects.</p>
+<div class="progress"><div class="bar" style="width:85%"></div></div>
+</div>
+
+<div class="card" data-name="css" onclick="openCourse('css')">
+<h2>CSS Design Pro</h2>
+<p>Responsive layouts, Flexbox, Grid and Animations.</p>
+<div class="progress"><div class="bar" style="width:70%"></div></div>
+</div>
+
+<div class="card" data-name="javascript" onclick="openCourse('js')">
+<h2>JavaScript Deep Dive</h2>
+<p>DOM, Events, APIs and Real Projects.</p>
+<div class="progress"><div class="bar" style="width:65%"></div></div>
+</div>
+
+<div class="card" data-name="fullstack" onclick="openCourse('fullstack')">
+<h2>Full Stack Bootcamp</h2>
+<p>Frontend + Backend + Deployment.</p>
+<div class="progress"><div class="bar" style="width:60%"></div></div>
+</div>
+
+</div>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+<span class="close" onclick="closeModal()">×</span>
+<h2 id="title"></h2>
+<p id="desc"></p>
+<h3>Topics Covered</h3>
+<ul id="topics"></ul>
+</div>
+</div>
+
+<footer>
+©️ 2026 TechLearn Pro LMS
+</footer>
+
+<script>
+
+const courses={
+html:{
+title:"HTML Mastery",
+desc:"Complete HTML Course",
+topics:["Structure","Headings","Links","Images","Tables","Forms","Semantic HTML"]
+},
+css:{
+title:"CSS Design Pro",
+desc:"Modern UI Design",
+topics:["Colors","Flexbox","Grid","Animations","Responsive Design"]
+},
+js:{
+title:"JavaScript Deep Dive",
+desc:"JavaScript Programming",
+topics:["Variables","Functions","Arrays","DOM","Events","Fetch API"]
+},
+fullstack:{
+title:"Full Stack Bootcamp",
+desc:"Become a Full Stack Developer",
+topics:["HTML","CSS","JavaScript","Node.js","Database","Deployment"]
+}
+};
+
+function openCourse(id){
+
+let c=courses[id];
+
+document.getElementById("title").innerText=c.title;
+document.getElementById("desc").innerText=c.desc;
+
+document.getElementById("topics").innerHTML=
+c.topics.map(topic=><li>${topic}</li>).join("");
+
+document.getElementById("modal").style.display="flex";
+}
+
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+
+function filterCourses(){
+
+let value=document.getElementById("search").value.toLowerCase();
+
+document.querySelectorAll(".card").forEach(card=>{
+
+card.style.display=
+card.dataset.name.includes(value)
+? "block"
+: "none";
+
+});
+}
+
+const cursor=document.getElementById("cursor");
+
+document.addEventListener("mousemove",(e)=>{
+
+cursor.style.left=e.clientX+"px";
+cursor.style.top=e.clientY+"px";
+
+});
+
+</script>
+
+</body>
+</html>

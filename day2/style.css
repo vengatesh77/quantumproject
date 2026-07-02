@@ -1,0 +1,248 @@
+/* Reset */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+/* Navbar */
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#222;
+    color:white;
+    padding:15px 30px;
+}
+.logo{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.logo img{
+    width:90px;
+    height:60px;
+    object-fit:contain;
+}
+
+.logo span{
+    font-size:30px;
+    font-weight:bold;
+    color:white;
+}
+
+
+.nav-links a{
+    color:white;
+    text-decoration:none;
+}
+
+.nav-links a:hover{
+    color:#6dd5ed;
+}
+
+/* Hero Section */
+.hero{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:500px;
+
+    background:
+    linear-gradient(rgba(0,0,0,0.1),
+    rgba(0,0,0,0.1)),
+    url("ChatGPT Image Jun 24, 2026, 03_32_41 PM.png");
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    color:white;
+    text-align:center;
+}
+.hero-content h1{
+    font-size:45px;
+    color:black;
+}
+
+.hero-content p{
+    margin:15px 0;
+    font-size:18px;
+    color:black;
+}
+
+.hero-content button{
+    padding:10px 20px;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+/* Features Section */
+.features{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    padding:40px;
+}
+.card{
+    background:white;
+    padding:35px 25px;
+    text-align:center;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
+    transition:all 0.3s ease;
+    position:relative;
+    overflow:hidden;
+}
+
+.card:hover{
+    transform:translateY(-10px);
+    box-shadow:0 15px 30px rgba(0,0,0,0.2);
+}
+
+.card h2{
+    font-size:px;
+    margin-bottom:15px;
+    color:green
+}
+
+.card p{
+    font-size:20px;
+    margin-bottom:20px;
+}
+
+
+.card a{
+    text-decoration:none;
+    color:black;
+}
+
+/* Contact Section */
+.contact{
+    padding:40px;
+    text-align:center;
+}
+
+/* Course Pages */
+.course-page{
+    padding:50px;
+}
+
+.course-page ul{
+    margin-top:20px;
+    margin-left:20px;
+}
+
+.btn{
+    display:inline-block;
+    margin-top:20px;
+    padding:10px 20px;
+    background:#2193b0;
+    color:white;
+    text-decoration:none;
+    border-radius:5px;
+}
+
+/* Footer */
+footer{
+    background:#222;
+    color:white;
+    text-align:center;
+    padding:15px;
+}
+
+/* Responsive Design */
+@media (max-width:768px){
+
+    .navbar{
+        flex-direction:column;
+    }
+
+    .nav-links{
+        flex-direction:column;
+        text-align:center;
+        margin-top:10px;
+    }
+
+    .features{
+        grid-template-columns:1fr;
+    }
+
+    .hero-content h1{
+        font-size:32px;
+    }
+}
+.course-header{
+    background:linear-gradient(135deg,#2193b0,#6dd5ed);
+    color:white;
+    text-align:center;
+    padding:60px 20px;
+}
+
+.course-header h1{
+    font-size:45px;
+}
+
+.course-header p{
+    margin-top:10px;
+    font-size:20px;
+}
+
+.course-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
+    padding:40px;
+}
+
+.topic-card{
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:black;
+    transition:0.3s;
+}
+
+.topic-card:hover{
+    transform:translateY(-10px);
+}
+
+.topic-card h2{
+    color:#2193b0;
+    margin-bottom:10px;
+}
+
+.center{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.btn{
+    background:#2193b0;
+    color:white;
+    padding:12px 25px;
+    text-decoration:none;
+    border-radius:30px;
+    font-weight:bold;
+}
+
+.btn:hover{
+    background:#176d82;
+}
+.course-btn{
+    display:inline-block;
+    background:linear-gradient(45deg,#007bff,#00c6ff);
+    color:white;
+    padding:12px 25px;
+    border-radius:30px;
+    text-decoration:none;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.course-btn:hover{
+    transform:scale(1.05);
+}
