@@ -1,0 +1,25 @@
+# College ERP Upgrade - Task Tracker
+
+- `[ ]` Phase 1: Layout & Theme Foundation
+  - `[ ]` Update index.html (title, fonts, meta)
+  - `[ ]` Rewrite App.css (sidebar layout, dark mode, responsive)
+  - `[ ]` Update App.jsx (login, navigation, state management)
+- `[ ]` Phase 2: Sidebar & Navbar
+  - `[ ]` Rewrite Sidebar.jsx
+  - `[ ]` Rewrite Navbar.jsx
+- `[ ]` Phase 3: Dashboard & Charts
+  - `[ ]` Rewrite Dashboard.jsx with colorful cards + Recharts
+- `[ ]` Phase 4: Student Form
+  - `[ ]` Rewrite StudentForm.jsx (new fields, photo upload, dropdowns)
+- `[ ]` Phase 5: Student Table & Actions
+  - `[ ]` Rewrite StudentTable.jsx (multi-search, export, confirm delete, view)
+- `[ ]` Phase 6: New Components
+  - `[ ]` Create LoginPage.jsx
+  - `[ ]` Create StudentProfile.jsx
+  - `[ ]` Create ConfirmModal.jsx
+  - `[ ]` Create LoadingSpinner.jsx
+  - `[ ]` Rewrite Footer.jsx
+  - `[ ]` Delete ThemeToggle.jsx
+- `[ ]` Phase 7: Dependencies
+  - `[ ]` Install recharts
+- `[ ]` Verification: run dev server and test
