@@ -1,57 +1,41 @@
-import { useEffect, useState } from "react";
-import EmployeeForm from "./components/EmployeeForm";
-import EmployeeList from "./components/EmployeeList";
-import { getEmployees,addEmployee,updateEmployee,deleteEmployee } from "./services/employeeService";
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import Dashboard from './components/Dashboard';
+import EmployeeManagement from './components/EmployeeManagement';
+import Departments from './components/Departments';
+import Designations from './components/Designations';
+import Attendance from './components/Attendance';
+import Payroll from './components/Payroll';
+import Reports from './components/Reports';
+import Settings from './components/Settings';
+import { ToastProvider } from './components/ToastContext';
 
+function App() {
+  return (
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="employees" element={<EmployeeManagement />} />
+            <Route path="departments" element={<Departments />} />
+            <Route path="designations" element={<Designations />} />
+            <Route path="attendance" element={<Attendance />} />
+            <Route path="payroll" element={<Payroll />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="*" element={
+              <div className="empty-state">
+                <h2>404 - Page Not Found</h2>
+                <p>The page you are looking for does not exist.</p>
+              </div>
+            } />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
+  );
+}
 
-function App(){
-
-  const[employees,setEmployees]=useState([]);//Store the emp list
- //store selected emp
-  const[editEmployee,setEditEmployee]=useState(null);
-  //load the details of employee--GET
-  
-  const storedEmployee=()=>{
-    getEmployees().then((response)=>{
-      setEmployees(response.data);
-    })
-    .catch((error)=>{
-        console.log(error);
-    });
-  };
-
-  useEffect(()=>{
-    storedEmployee();
-  },[]);
-
-  const insertEmployee=(employee)=>{
-    addEmployee(employee).then(()=>{storedEmployee();
-  });
-};
-
-return(
-<div>
-  <h1>Employee Management</h1>
-
-  <EmployeeForm
-  addEmployee={insertEmployee}
-  editEmployee={editEmployee}
-  updateEmployee={editEmployee}
-  
-  />
-  <EmployeeList
-  
-  employees={employees}
-   onDelete={editEmployee}
-   onEdit={setEditEmployee}
-  
-  
-  />
-</div> 
-
-)
-
-
-
-};
 export default App;

@@ -87,9 +87,9 @@ function AppContent() {
   // ② Smart search/filter/sort on top of API products
   const {
     query, setQuery,
-    filters, updateFilter, toggleBrand, clearFilters,
+    filters, updateFilter, toggleBrand, toggleColor, toggleSize, clearFilters,
     sortBy, setSortBy,
-    filteredProducts, availableBrands,
+    filteredProducts, availableBrands, availableColors, availableSizes,
     cleanQuery,
   } = useSmartSearch(products, 'all');
 
@@ -181,6 +181,10 @@ function AppContent() {
           clearFilters={clearFilters}
           availableBrands={availableBrands}
           toggleBrand={toggleBrand}
+          availableColors={availableColors}
+          toggleColor={toggleColor}
+          availableSizes={availableSizes}
+          toggleSize={toggleSize}
           isOpen={mobileFilterOpen}
           onClose={() => setMobileFilterOpen(false)}
           categories={categories}

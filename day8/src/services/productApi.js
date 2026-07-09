@@ -1,145 +1,118 @@
 /**
  * productApi.js – NexaStore API Service
  *
- * Fetches real products from DummyJSON + FakeStore, normalises both
- * into the same schema, converts USD → INR, caches in localStorage.
+ * Fetches real products from DummyJSON + FakeStore strictly.
+ * Normalizes them into the NexaStore schema, removes duplicates based
+ * on product name, brand, and image URL.
  */
 
 const DUMMYJSON = 'https://dummyjson.com';
-const FAKESTORE  = 'https://fakestoreapi.com';
-const USD_INR    = 83;          // conversion rate
-const CACHE_KEY  = 'nxs_products_v3';
-const CACHE_TTL  = 15 * 60 * 1000; // 15 min
+const FAKESTORE = 'https://fakestoreapi.com';
+const USD_INR = 83; // conversion rate
+const CACHE_KEY = 'nxs_products_api_direct_v2';
+const CACHE_TTL = 30 * 60 * 1000; // 30 min
 
-// ─── Category normalisation ─────────────────────────────────────────────────
+const COLORS = ['Red', 'Blue', 'Black', 'White', 'Green', 'Yellow', 'Silver', 'Gold', 'Grey', 'Pink', 'Purple', 'Orange'];
+const SIZES = ['S', 'M', 'L', 'XL', 'XXL', '6', '7', '8', '9', '10', '11', 'Free Size'];
 
-const CAT_MAP = {
-  smartphones:          { label: 'Mobiles',             icon: '📱' },
-  'mobile-accessories': { label: 'Mobile Accessories',  icon: '📱' },
-  tablets:              { label: 'Tablets',              icon: '📱' },
-  laptops:              { label: 'Laptops',              icon: '💻' },
-  'computers':          { label: 'Computers',            icon: '💻' },
-  electronics:          { label: 'Electronics',          icon: '⚡' },
-  'mens-shirts':        { label: "Men's Clothing",       icon: '👔' },
-  "men's clothing":     { label: "Men's Clothing",       icon: '👔' },
-  tops:                 { label: "Women's Clothing",     icon: '👗' },
-  'womens-dresses':     { label: "Women's Clothing",     icon: '👗' },
-  "women's clothing":   { label: "Women's Clothing",     icon: '👗' },
-  'mens-shoes':         { label: 'Shoes',                icon: '👟' },
-  'womens-shoes':       { label: 'Shoes',                icon: '👟' },
-  'womens-bags':        { label: 'Bags',                 icon: '👜' },
-  'womens-jewellery':   { label: 'Accessories',          icon: '💍' },
-  jewelery:             { label: 'Accessories',          icon: '💍' },
-  sunglasses:           { label: 'Accessories',          icon: '🕶️' },
-  'mens-watches':       { label: 'Smart Watches',        icon: '⌚' },
-  'womens-watches':     { label: 'Accessories',          icon: '⌚' },
-  beauty:               { label: 'Beauty',               icon: '✨' },
-  fragrances:           { label: 'Beauty',               icon: '🌸' },
-  'skin-care':          { label: 'Skin Care',            icon: '🧴' },
-  skincare:             { label: 'Skin Care',            icon: '🧴' },
-  groceries:            { label: 'Grocery',              icon: '🛒' },
-  'home-decoration':    { label: 'Home & Décor',         icon: '🏠' },
-  furniture:            { label: 'Furniture',             icon: '🛋️' },
-  'kitchen-accessories':{ label: 'Kitchen',              icon: '🍳' },
-  'sports-accessories': { label: 'Sports',               icon: '⚽' },
-  automotive:           { label: 'Automotive',           icon: '🚗' },
-  motorcycle:           { label: 'Automotive',           icon: '🏍️' },
-  lighting:             { label: 'Home & Décor',         icon: '💡' },
-  vehicle:              { label: 'Automotive',           icon: '🚗' },
-};
-
-function catInfo(raw) {
-  const key = (raw || '').toLowerCase().trim();
-  if (CAT_MAP[key]) return { id: key, ...CAT_MAP[key] };
-  const label = key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-  return { id: key, label, icon: '🛍️' };
+function getRandomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// ─── Badge helper ───────────────────────────────────────────────────────────
-
-function badge(disc, rating, id) {
-  if (disc >= 20)    return { badge: 'sale', badgeLabel: 'SALE' };
-  if (rating >= 4.7) return { badge: 'hot',  badgeLabel: 'HOT'  };
-  if (id <= 15)      return { badge: 'new',  badgeLabel: 'NEW'  };
+function badge(disc, rating) {
+  if (disc >= 20) return { badge: 'sale', badgeLabel: 'SALE' };
+  if (rating >= 4.7) return { badge: 'hot', badgeLabel: 'HOT' };
   return { badge: '', badgeLabel: '' };
 }
 
 // ─── Normalisers ────────────────────────────────────────────────────────────
 
 function normDummy(p) {
-  const cat        = catInfo(p.category);
-  const priceINR   = Math.round(p.price * USD_INR);
-  const disc       = p.discountPercentage || 0;
-  const origINR    = disc > 0 ? Math.round(priceINR / (1 - disc / 100)) : priceINR;
-  const reviewCount = (p.reviews?.length || 3) * Math.floor(200 + Math.random() * 1800);
-  const { badge: b, badgeLabel: bl } = badge(disc, p.rating, p.id);
+  const priceINR = Math.round(p.price * USD_INR);
+  const disc = p.discountPercentage || 0;
+  const origINR = disc > 0 ? Math.round(priceINR / (1 - disc / 100)) : priceINR;
+  const rating = p.rating || 4.0;
+  const { badge: b, badgeLabel: bl } = badge(disc, rating);
+  const brand = p.brand || p.title.split(' ')[0];
 
   return {
-    id:            `dj-${p.id}`,
-    name:          p.title,
-    brand:         p.brand || p.title.split(' ')[0],
-    category:      cat.id,
-    categoryLabel: cat.label,
-    categoryIcon:  cat.icon,
-    price:         priceINR,
+    id: `dj-${p.id}`,
+    name: p.title,
+    brand: brand,
+    price: priceINR,
     originalPrice: origINR,
-    rating:        p.rating,
-    reviews:       reviewCount,
-    badge:         b,
-    badgeLabel:    bl,
-    inStock:       (p.stock ?? 1) > 0,
-    description:   p.description,
-    features:      p.tags || [p.brand, p.category].filter(Boolean),
-    image:         p.thumbnail,
-    allImages:     p.images || [p.thumbnail],
-    deliveryTime:  p.shippingInformation || `${Math.ceil(1 + Math.random() * 5)} days`,
+    rating: parseFloat(rating),
+    reviews: p.reviews ? p.reviews.length * 15 : Math.floor(Math.random() * 500) + 10,
+    badge: b,
+    badgeLabel: bl,
+    inStock: (p.stock ?? 1) > 0,
+    description: p.description,
+    image: p.thumbnail,
+    allImages: p.images || [p.thumbnail],
+    category: p.category,
+    categoryLabel: p.category.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    color: getRandomItem(COLORS),
+    size: getRandomItem(SIZES),
+    deliveryTime: `${Math.floor(Math.random() * 5) + 2} days`,
+    features: p.tags || [brand, p.categoryLabel || p.category],
   };
 }
 
 function normFake(p) {
-  const cat      = catInfo(p.category);
   const priceINR = Math.round(p.price * USD_INR);
-  const rating   = typeof p.rating === 'object' ? p.rating.rate  : p.rating;
-  const ratingCt = typeof p.rating === 'object' ? p.rating.count : 50;
-  const { badge: b, badgeLabel: bl } = badge(0, rating, p.id + 200);
+  const ratingObj = typeof p.rating === 'object' ? p.rating : { rate: p.rating || 4.0, count: 50 };
+  const disc = Math.floor(Math.random() * 30);
+  const origINR = disc > 0 ? Math.round(priceINR / (1 - disc / 100)) : priceINR;
+  const { badge: b, badgeLabel: bl } = badge(disc, ratingObj.rate);
   const brand = p.title.includes(' - ') ? p.title.split(' - ')[0].trim() : p.title.split(' ')[0];
+  const catLabel = p.category.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
   return {
-    id:            `fs-${p.id}`,
-    name:          p.title,
-    brand,
-    category:      cat.id,
-    categoryLabel: cat.label,
-    categoryIcon:  cat.icon,
-    price:         priceINR,
-    originalPrice: priceINR,
-    rating,
-    reviews:       ratingCt,
-    badge:         b,
-    badgeLabel:    bl,
-    inStock:       true,
-    description:   p.description,
-    features:      [brand, cat.label],
-    image:         p.image,
-    allImages:     [p.image],
-    deliveryTime:  `${Math.ceil(1 + Math.random() * 5)} days`,
+    id: `fs-${p.id}`,
+    name: p.title,
+    brand: brand,
+    price: priceINR,
+    originalPrice: origINR,
+    rating: parseFloat(ratingObj.rate),
+    reviews: ratingObj.count,
+    badge: b,
+    badgeLabel: bl,
+    inStock: true,
+    description: p.description,
+    image: p.image,
+    allImages: [p.image],
+    category: p.category,
+    categoryLabel: catLabel,
+    color: getRandomItem(COLORS),
+    size: getRandomItem(SIZES),
+    deliveryTime: `${Math.floor(Math.random() * 5) + 2} days`,
+    features: [brand, catLabel],
   };
 }
 
 // ─── Fetchers ───────────────────────────────────────────────────────────────
 
 async function fetchDummyJSON() {
-  // Fetch both pages (DummyJSON has ~194 products)
-  const [r1, r2] = await Promise.all([
-    fetch(`${DUMMYJSON}/products?limit=100&skip=0&select=id,title,description,price,discountPercentage,rating,stock,brand,category,thumbnail,images,tags,reviews,shippingInformation`).then(r => r.json()),
-    fetch(`${DUMMYJSON}/products?limit=100&skip=100&select=id,title,description,price,discountPercentage,rating,stock,brand,category,thumbnail,images,tags,reviews,shippingInformation`).then(r => r.json()),
-  ]);
-  return [...(r1.products || []), ...(r2.products || [])].map(normDummy);
+  try {
+    const [r1, r2] = await Promise.all([
+      fetch(`${DUMMYJSON}/products?limit=100&skip=0`).then(r => r.json()),
+      fetch(`${DUMMYJSON}/products?limit=100&skip=100`).then(r => r.json()),
+    ]);
+    return [...(r1.products || []), ...(r2.products || [])].map(normDummy);
+  } catch (e) {
+    console.error("DummyJSON fetch error", e);
+    return [];
+  }
 }
 
 async function fetchFakeStore() {
-  const data = await fetch(`${FAKESTORE}/products`).then(r => r.json());
-  return (Array.isArray(data) ? data : []).map(normFake);
+  try {
+    const data = await fetch(`${FAKESTORE}/products`).then(r => r.json());
+    return (Array.isArray(data) ? data : []).map(normFake);
+  } catch (e) {
+    console.error("FakeStore fetch error", e);
+    return [];
+  }
 }
 
 // ─── Main export ────────────────────────────────────────────────────────────
@@ -150,47 +123,76 @@ export async function loadAllProducts() {
     const raw = localStorage.getItem(CACHE_KEY);
     if (raw) {
       const { ts, data } = JSON.parse(raw);
-      if (Date.now() - ts < CACHE_TTL && data?.length > 0) return data;
+      if (Date.now() - ts < CACHE_TTL && data?.length > 50) return data;
     }
   } catch (_) {}
 
-  // ② Fetch both sources in parallel (tolerate individual failures)
-  const [djResult, fsResult] = await Promise.allSettled([
+  // ② Fetch all sources in parallel
+  const [dj, fs] = await Promise.all([
     fetchDummyJSON(),
     fetchFakeStore(),
   ]);
 
-  const all = [
-    ...(djResult.status === 'fulfilled' ? djResult.value : []),
-    ...(fsResult.status === 'fulfilled' ? fsResult.value : []),
-  ];
+  const allProducts = [...dj, ...fs];
 
-  // ③ Deduplicate by lowercase name
-  const seen = new Set();
-  const unique = all.filter(p => {
-    const key = p.name.toLowerCase().trim();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  // ③ Strictly deduplicate based on Product Name, Brand, Image URL
+  const uniqueProducts = [];
+  const seenNames = new Set();
+  const seenImages = new Set();
+  const seenBrandsForName = new Map();
+
+  for (const product of allProducts) {
+    const nameKey = product.name.toLowerCase().trim();
+    const imageKey = product.image;
+    const brandKey = product.brand.toLowerCase().trim();
+
+    // Condition 1: Same Image URL
+    if (seenImages.has(imageKey)) continue;
+    
+    // Condition 2: Same Name AND Brand
+    if (seenNames.has(nameKey) && seenBrandsForName.get(nameKey) === brandKey) {
+      continue;
+    }
+
+    seenNames.add(nameKey);
+    seenImages.add(imageKey);
+    seenBrandsForName.set(nameKey, brandKey);
+    uniqueProducts.push(product);
+  }
 
   // ④ Cache
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: unique }));
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: uniqueProducts }));
   } catch (_) {}
 
-  return unique;
+  return uniqueProducts;
 }
 
-/** Derive a sorted, deduplicated categories list from loaded products */
+/** Derive categories list from loaded products */
 export function buildCategories(products) {
   const map = new Map();
-  map.set('all', { id: 'all', label: 'All Products', icon: '🏪' });
+  map.set('all', { id: 'all', label: 'All Categories', icon: '🏪' });
+  
   products.forEach(p => {
     if (!map.has(p.category)) {
-      map.set(p.category, { id: p.category, label: p.categoryLabel, icon: p.categoryIcon || '🛍️' });
+      // Determine a rough icon based on text
+      let icon = '🛍️';
+      const catLow = p.category.toLowerCase();
+      if (catLow.includes('phone') || catLow.includes('tablet')) icon = '📱';
+      else if (catLow.includes('laptop') || catLow.includes('computer')) icon = '💻';
+      else if (catLow.includes('cloth') || catLow.includes('shirt') || catLow.includes('dress')) icon = '👔';
+      else if (catLow.includes('shoe')) icon = '👟';
+      else if (catLow.includes('watch')) icon = '⌚';
+      else if (catLow.includes('jewel')) icon = '💍';
+      else if (catLow.includes('beauty') || catLow.includes('fragrance') || catLow.includes('skin')) icon = '✨';
+      else if (catLow.includes('furniture') || catLow.includes('home')) icon = '🏠';
+      else if (catLow.includes('grocery')) icon = '🛒';
+      else if (catLow.includes('sport') || catLow.includes('vehicle') || catLow.includes('motor')) icon = '⚽';
+
+      map.set(p.category, { id: p.category, label: p.categoryLabel, icon });
     }
   });
+
   return Array.from(map.values());
 }
 

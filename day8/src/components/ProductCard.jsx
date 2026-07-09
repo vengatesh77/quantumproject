@@ -74,7 +74,7 @@ export default function ProductCard({ product, onOpenModal, isListMode, highligh
           loading="lazy"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = `https://placehold.co/400x400/130e02/f97316?text=NexaStore`;
+            e.target.src = `https://source.unsplash.com/400x400/?${product.category}`;
           }}
         />
       </div>

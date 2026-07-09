@@ -3,20 +3,20 @@ import ProductCard from "./ProductCard";
 
 export default function ProductGrid({ products, onOpenModal, sortBy, setSortBy, highlightTerm = "" }) {
   const [isListMode, setIsListMode] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(24);
+  const [visibleCount, setVisibleCount] = useState(20);
   const observerTarget = useRef(null);
 
   const sorted = products;
 
   useEffect(() => {
-    setVisibleCount(24); // Reset on products change (e.g. search/filter)
+    setVisibleCount(20); // Reset on products change (e.g. search/filter)
   }, [products]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && visibleCount < sorted.length) {
-          setVisibleCount((prev) => Math.min(prev + 24, sorted.length));
+          setVisibleCount((prev) => Math.min(prev + 20, sorted.length));
         }
       },
       { threshold: 0.1 }

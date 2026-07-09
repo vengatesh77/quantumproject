@@ -4,6 +4,10 @@ export default function FilterSidebar({
   clearFilters, 
   availableBrands, 
   toggleBrand,
+  availableColors = [],
+  toggleColor,
+  availableSizes = [],
+  toggleSize,
   isOpen,
   onClose,
   categories = [],
@@ -170,6 +174,46 @@ export default function FilterSidebar({
                     />
                     <span className="checkbox-custom"></span>
                     <span>{brand}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Colors */}
+          {availableColors.length > 0 && (
+            <div className="filter-group">
+              <h4 className="filter-title">Color</h4>
+              <div className="filter-options brand-options">
+                {availableColors.map(color => (
+                  <label key={color} className="filter-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={filters.colors?.includes(color)}
+                      onChange={() => toggleColor(color)}
+                    />
+                    <span className="checkbox-custom"></span>
+                    <span>{color}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sizes */}
+          {availableSizes.length > 0 && (
+            <div className="filter-group">
+              <h4 className="filter-title">Size</h4>
+              <div className="filter-options brand-options">
+                {availableSizes.map(size => (
+                  <label key={size} className="filter-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={filters.sizes?.includes(size)}
+                      onChange={() => toggleSize(size)}
+                    />
+                    <span className="checkbox-custom"></span>
+                    <span>{size}</span>
                   </label>
                 ))}
               </div>

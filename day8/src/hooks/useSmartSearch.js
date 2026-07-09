@@ -15,14 +15,31 @@ export default function useSmartSearch(products = [], initialCategory = 'all') {
     discount:     0,
     availability: '',
     brands:       [],
+    colors:       [],
+    sizes:        [],
   });
 
-  // Derive unique brand list from whatever products are loaded
+  // Derive unique brand, color, size lists from whatever products are loaded
   const availableBrands = useMemo(() => {
     const set = new Set();
     products.forEach(p => {
-      const brand = p.brand || p.name.split(' ')[0];
-      if (brand) set.add(brand);
+      if (p.brand) set.add(p.brand);
+    });
+    return Array.from(set).sort();
+  }, [products]);
+
+  const availableColors = useMemo(() => {
+    const set = new Set();
+    products.forEach(p => {
+      if (p.color) set.add(p.color);
+    });
+    return Array.from(set).sort();
+  }, [products]);
+
+  const availableSizes = useMemo(() => {
+    const set = new Set();
+    products.forEach(p => {
+      if (p.size) set.add(p.size);
     });
     return Array.from(set).sort();
   }, [products]);
@@ -46,6 +63,8 @@ export default function useSmartSearch(products = [], initialCategory = 'all') {
           p.description,
           p.badge,
           p.badgeLabel,
+          p.color || '',
+          p.size || '',
           ...(p.features || []),
         ].join(' ').toLowerCase();
         return tokens.every(t => text.includes(t));
@@ -90,10 +109,15 @@ export default function useSmartSearch(products = [], initialCategory = 'all') {
     if (filters.availability === 'out-of-stock') result = result.filter(p => p.inStock === false);
 
     if (filters.brands.length > 0) {
-      result = result.filter(p => {
-        const b = p.brand || p.name.split(' ')[0];
-        return filters.brands.includes(b);
-      });
+      result = result.filter(p => filters.brands.includes(p.brand));
+    }
+
+    if (filters.colors && filters.colors.length > 0) {
+      result = result.filter(p => filters.colors.includes(p.color));
+    }
+
+    if (filters.sizes && filters.sizes.length > 0) {
+      result = result.filter(p => filters.sizes.includes(p.size));
     }
 
     // 4 – Sorting
@@ -124,7 +148,7 @@ export default function useSmartSearch(products = [], initialCategory = 'all') {
     setFilters(prev => ({ ...prev, [key]: value }));
 
   const clearFilters = () => {
-    setFilters({ category: 'all', priceRange: '', rating: 0, discount: 0, availability: '', brands: [] });
+    setFilters({ category: 'all', priceRange: '', rating: 0, discount: 0, availability: '', brands: [], colors: [], sizes: [] });
     setQuery('');
   };
 
@@ -136,11 +160,27 @@ export default function useSmartSearch(products = [], initialCategory = 'all') {
         : [...prev.brands, brand],
     }));
 
+  const toggleColor = color =>
+    setFilters(prev => ({
+      ...prev,
+      colors: prev.colors.includes(color)
+        ? prev.colors.filter(c => c !== color)
+        : [...prev.colors, color],
+    }));
+
+  const toggleSize = size =>
+    setFilters(prev => ({
+      ...prev,
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter(s => s !== size)
+        : [...prev.sizes, size],
+    }));
+
   return {
     query, setQuery,
-    filters, updateFilter, toggleBrand, clearFilters,
+    filters, updateFilter, toggleBrand, toggleColor, toggleSize, clearFilters,
     sortBy, setSortBy,
-    filteredProducts, availableBrands,
+    filteredProducts, availableBrands, availableColors, availableSizes,
     cleanQuery: parseNaturalLanguageQuery(query).cleanQuery,
   };
 }

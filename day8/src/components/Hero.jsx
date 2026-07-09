@@ -124,7 +124,7 @@ export default function Hero({ products = [] }) {
 
             {/* Feature pills */}
             <div className="showcase-features">
-              {active.features.slice(0, 3).map((f) => (
+              {(active.features || []).slice(0, 3).map((f) => (
                 <span key={f} className="showcase-pill">✓ {f}</span>
               ))}
             </div>
