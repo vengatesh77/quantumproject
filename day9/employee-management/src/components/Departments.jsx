@@ -1,20 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { getDepartments, addDepartment, updateDepartment, deleteDepartment } from '../services/localStorageService';
+import { getDepartments, addDepartment, updateDepartment, deleteDepartment } from '../services/api';
 import { useToast } from './ToastContext';
 import { Search, Plus, Edit2, Trash2, Building2 } from 'lucide-react';
 
+const Spinner = () => (
+  <div style={{ textAlign: 'center', padding: '2rem' }}>
+    <div style={{
+      display: 'inline-block', width: 32, height: 32,
+      border: '3px solid rgba(99,102,241,0.2)',
+      borderTopColor: '#6366f1', borderRadius: '50%',
+      animation: 'spin 0.8s linear infinite',
+    }} />
+    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+  </div>
+);
+
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showModal, setShowModal] = useState(false);
+  const [searchTerm,  setSearchTerm]  = useState('');
+  const [showModal,   setShowModal]   = useState(false);
   const [currentDept, setCurrentDept] = useState(null);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({ name: '', manager: '', location: '', status: 'Active' });
 
-  useEffect(() => { loadData(); }, []);
+  const loadData = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      setDepartments(await getDepartments());
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const loadData = () => { setDepartments(getDepartments()); };
+  useEffect(() => { loadData(); }, []);
 
   const handleOpenModal = (dept = null) => {
     if (dept) {
@@ -27,30 +51,41 @@ const Departments = () => {
     setShowModal(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    if (currentDept) {
-      updateDepartment({ ...currentDept, ...formData });
-      toast('Department updated successfully');
-    } else {
-      addDepartment(formData);
-      toast('Department added successfully');
+    try {
+      if (currentDept) {
+        await updateDepartment(currentDept.id, { ...currentDept, ...formData });
+        toast('Department updated successfully ✅');
+      } else {
+        const maxNum = departments.reduce((max, d) => {
+          const n = parseInt((d.deptId || '').replace('DEPT', '')) || 0;
+          return n > max ? n : max;
+        }, 0);
+        await addDepartment({ ...formData, deptId: `DEPT${String(maxNum + 1).padStart(3, '0')}` });
+        toast('Department added successfully ✅');
+      }
+      setShowModal(false);
+      await loadData();
+    } catch {
+      toast('Error saving department. Check API server.', 'error');
     }
-    setShowModal(false);
-    loadData();
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this department?')) {
-      deleteDepartment(id);
-      toast('Department deleted');
-      loadData();
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this department?')) return;
+    try {
+      await deleteDepartment(id);
+      toast('Department deleted ✅');
+      await loadData();
+    } catch {
+      toast('Error deleting department.', 'error');
     }
   };
 
-  const filtered = departments.filter(d => 
-    d.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    d.id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = departments.filter(d =>
+    d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (d.deptId || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -63,13 +98,8 @@ const Departments = () => {
         <div className="section-actions">
           <div className="search-input-wrap hide-print">
             <Search size={16} />
-            <input 
-              type="text" 
-              className="form-control" 
-              placeholder="Search departments..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
+            <input type="text" className="form-control" placeholder="Search departments..."
+              value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
           <button className="btn btn-primary hide-print" onClick={() => handleOpenModal()}>
             <Plus size={16} /> Add Department
@@ -79,50 +109,51 @@ const Departments = () => {
 
       <div className="card" style={{ padding: 0 }}>
         <div className="table-wrapper">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Department Name</th>
-                <th>Manager</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th className="hide-print" style={{ textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(dept => (
-                <tr key={dept.id}>
-                  <td className="font-medium text-muted">{dept.id}</td>
-                  <td className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <Building2 size={16} className="text-primary-color" />
-                      {dept.name}
-                    </div>
-                  </td>
-                  <td>{dept.manager}</td>
-                  <td>{dept.location}</td>
-                  <td>
-                    <span className={`badge ${dept.status === 'Active' ? 'badge-success' : 'badge-danger'}`}>
-                      {dept.status}
-                    </span>
-                  </td>
-                  <td className="hide-print" style={{ textAlign: 'right' }}>
-                    <button className="btn-icon edit" onClick={() => handleOpenModal(dept)}><Edit2 size={16}/></button>
-                    <button className="btn-icon delete" onClick={() => handleDelete(dept.id)}><Trash2 size={16}/></button>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
+          {loading ? <Spinner /> : error ? (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#ef4444' }}>
+              ⚠️ Cannot connect to API. Run <code>npm run server</code>
+            </div>
+          ) : (
+            <table className="table">
+              <thead>
                 <tr>
-                  <td colSpan="6" className="empty-state">
-                    <Building2 size={48} />
-                    <h3>No departments found</h3>
-                  </td>
+                  <th>ID</th>
+                  <th>Department Name</th>
+                  <th>Manager</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th className="hide-print" style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map(dept => (
+                  <tr key={dept.id}>
+                    <td className="font-medium text-muted">{dept.deptId}</td>
+                    <td className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <Building2 size={16} className="text-primary-color" />
+                        {dept.name}
+                      </div>
+                    </td>
+                    <td>{dept.manager}</td>
+                    <td>{dept.location}</td>
+                    <td>
+                      <span className={`badge ${dept.status === 'Active' ? 'badge-success' : 'badge-danger'}`}>
+                        {dept.status}
+                      </span>
+                    </td>
+                    <td className="hide-print" style={{ textAlign: 'right' }}>
+                      <button className="btn-icon edit" onClick={() => handleOpenModal(dept)}><Edit2 size={16}/></button>
+                      <button className="btn-icon delete" onClick={() => handleDelete(dept.id)}><Trash2 size={16}/></button>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr><td colSpan="6" className="empty-state"><Building2 size={48}/><h3>No departments found</h3></td></tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
@@ -137,19 +168,23 @@ const Departments = () => {
               <div className="modal-body form-grid-2">
                 <div className="form-group col-span-2">
                   <label className="form-label">Department Name *</label>
-                  <input type="text" className="form-control" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
+                  <input type="text" className="form-control" value={formData.name}
+                    onChange={e => setFormData({...formData, name: e.target.value})} required />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Manager Name *</label>
-                  <input type="text" className="form-control" value={formData.manager} onChange={e => setFormData({...formData, manager: e.target.value})} required />
+                  <input type="text" className="form-control" value={formData.manager}
+                    onChange={e => setFormData({...formData, manager: e.target.value})} required />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Location *</label>
-                  <input type="text" className="form-control" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} required />
+                  <input type="text" className="form-control" value={formData.location}
+                    onChange={e => setFormData({...formData, location: e.target.value})} required />
                 </div>
                 <div className="form-group col-span-2">
                   <label className="form-label">Status</label>
-                  <select className="form-control" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                  <select className="form-control" value={formData.status}
+                    onChange={e => setFormData({...formData, status: e.target.value})}>
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
                   </select>

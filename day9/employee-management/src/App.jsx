@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import EmployeeManagement from './components/EmployeeManagement';
@@ -9,6 +9,8 @@ import Attendance from './components/Attendance';
 import Payroll from './components/Payroll';
 import Reports from './components/Reports';
 import Settings from './components/Settings';
+import Login from './components/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 import { ToastProvider } from './components/ToastContext';
 
 function App() {
@@ -16,7 +18,12 @@ function App() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
             <Route index element={<Dashboard />} />
             <Route path="employees" element={<EmployeeManagement />} />
             <Route path="departments" element={<Departments />} />

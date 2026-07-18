@@ -23,7 +23,10 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) navigate('/');
+    if (window.confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('isAuthenticated');
+      navigate('/login');
+    }
   };
 
   const SidebarContent = () => (
